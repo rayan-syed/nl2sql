@@ -66,21 +66,36 @@ def test_load_csv_raises_if_file_does_not_exist(conn):
         loader.load_csv("missing_file.csv", "people")
 
 
-def test_load_csv_raises_if_table_already_exists(tmp_path, conn):
-    csv_path = tmp_path / "people.csv"
-    df = pd.DataFrame(
+def test_load_csv_appends_to_matching_table(tmp_path, conn):
+    first_csv = tmp_path / "people1.csv"
+    second_csv = tmp_path / "people2.csv"
+
+    df1 = pd.DataFrame(
         {
             "Name": ["Alice"],
             "Age": [20]
         }
     )
-    df.to_csv(csv_path, index=False)
+    df2 = pd.DataFrame(
+        {
+            "Name": ["Bob"],
+            "Age": [21]
+        }
+    )
+
+    df1.to_csv(first_csv, index=False)
+    df2.to_csv(second_csv, index=False)
 
     loader = CSVLoader(conn)
-    loader.load_csv(csv_path, "people")
+    loader.load_csv(first_csv, "people")
+    result = loader.load_csv(second_csv, "people")
 
-    with pytest.raises(ValueError, match="already exists"):
-        loader.load_csv(csv_path, "people")
+    assert result["table_name"] == "people"
+    assert result["rows_inserted"] == 1
+    assert result["action"] == "appended"
+
+    rows = conn.execute('SELECT name, age FROM "people" ORDER BY id').fetchall()
+    assert rows == [("Alice", 20), ("Bob", 21)]
 
 
 def test_load_csv_raises_on_duplicate_column_names_after_normalization(tmp_path, conn):
