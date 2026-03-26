@@ -5,6 +5,19 @@ import sqlite3
 import pandas as pd
 
 
+CREATE_TABLE_TEMPLATE = """
+CREATE TABLE "{table_name}" (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    {columns}
+)
+"""
+
+INSERT_TEMPLATE = """
+INSERT INTO "{table_name}" ({columns})
+VALUES ({placeholders})
+"""
+
+
 class CSVLoader:
     def __init__(self, conn):
         self.conn = conn
@@ -86,20 +99,19 @@ class CSVLoader:
             columns.append(f'"{col}" {sql_type}')
             column_info.append({"name": col, "type": sql_type})
 
-        create_sql = f"""
-        CREATE TABLE "{table_name}" (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            {", ".join(columns)}
+        create_sql = CREATE_TABLE_TEMPLATE.format(
+            table_name=table_name,
+            columns=", ".join(columns),
         )
-        """
 
         placeholders = ", ".join(["?"] * len(df.columns))
         quoted_columns = ", ".join([f'"{col}"' for col in df.columns])
 
-        insert_sql = f"""
-        INSERT INTO "{table_name}" ({quoted_columns})
-        VALUES ({placeholders})
-        """
+        insert_sql = INSERT_TEMPLATE.format(
+            table_name=table_name,
+            columns=quoted_columns,
+            placeholders=placeholders,
+        )
 
         rows = []
         for row in df.itertuples(index=False, name=None):
