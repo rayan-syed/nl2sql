@@ -1,3 +1,4 @@
+pandas
 pytest
 autopep8
 flake8
