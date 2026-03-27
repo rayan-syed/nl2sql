@@ -4,10 +4,10 @@ from schema.schema_manager import SchemaManager
 
 
 class CLI:
-    def __init__(self, conn):
+    def __init__(self, conn, llm_adapter=None):
         self.conn = conn
         self.csv_loader = CSVLoader(conn)
-        self.query_service = QueryService(conn)
+        self.query_service = QueryService(conn, llm_adapter=llm_adapter)
         self.schema_manager = SchemaManager(conn)
 
     def run(self):
@@ -43,6 +43,10 @@ class CLI:
                 self.run_sql_query()
                 continue
 
+            if command == "ask":
+                self.run_nl_query()
+                continue
+
             print("Unknown command. Type 'help' to see available commands.")
 
     def print_help(self):
@@ -51,6 +55,7 @@ class CLI:
         print("  tables - list tables in the database")
         print("  schema - show database schema")
         print("  query  - run a SQL query")
+        print("  ask    - ask a natural language question")
         print("  help   - show this message")
         print("  exit   - quit the program")
 
@@ -90,6 +95,22 @@ class CLI:
             print(f'Error: {result["error"]}')
             return
 
+        self.print_query_result(result)
+
+    def run_nl_query(self):
+        user_query = input("Question: ").strip()
+        result = self.query_service.run_nl_query(user_query)
+
+        if "generated_sql" in result:
+            print(f'\nGenerated SQL:\n{result["generated_sql"]}\n')
+
+        if not result["success"]:
+            print(f'Error: {result["error"]}')
+            return
+
+        self.print_query_result(result)
+
+    def print_query_result(self, result):
         columns = result["columns"]
         rows = result["rows"]
 
@@ -99,9 +120,9 @@ class CLI:
 
         print()
         print(" | ".join(columns))
-        print("-" * (len(" | ".join(columns))))
+        print("-" * len(" | ".join(columns)))
 
         for row in rows:
             print(" | ".join(str(value) for value in row))
 
-        print(f"\n{result['row_count']} row(s) returned.")
+        print(f'\n{result["row_count"]} row(s) returned.')

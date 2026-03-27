@@ -4,6 +4,14 @@ import pytest
 from query.query_service import QueryService
 
 
+class MockLLMAdapter:
+    def __init__(self, sql):
+        self.sql = sql
+
+    def generate_sql(self, user_query, schema_text):
+        return self.sql
+
+
 @pytest.fixture
 def conn():
     connection = sqlite3.connect(":memory:")
@@ -68,3 +76,38 @@ def test_run_sql_query_rejects_unknown_column(query_service):
 
     assert result["success"] is False
     assert result["error"] == "Unknown column: missing_column"
+
+
+def test_run_nl_query_returns_rows_for_valid_generated_sql(conn):
+    llm_adapter = MockLLMAdapter("SELECT name, age FROM employees ORDER BY id")
+    query_service = QueryService(conn, llm_adapter=llm_adapter)
+
+    result = query_service.run_nl_query("Show employee names and ages")
+
+    assert result["success"] is True
+    assert result["generated_sql"] == "SELECT name, age FROM employees ORDER BY id"
+    assert result["columns"] == ["name", "age"]
+    assert result["rows"] == [("Alice", 20), ("Bob", 21)]
+    assert result["row_count"] == 2
+
+
+def test_run_nl_query_rejects_invalid_generated_sql(conn):
+    llm_adapter = MockLLMAdapter("DELETE FROM employees")
+    query_service = QueryService(conn, llm_adapter=llm_adapter)
+
+    result = query_service.run_nl_query("Delete all employees")
+
+    assert result["success"] is False
+    assert result["generated_sql"] == "DELETE FROM employees"
+    assert result["error"] == "Only SELECT queries are allowed."
+
+
+def test_run_nl_query_rejects_hallucinated_column(conn):
+    llm_adapter = MockLLMAdapter("SELECT bonus FROM employees")
+    query_service = QueryService(conn, llm_adapter=llm_adapter)
+
+    result = query_service.run_nl_query("Show employee bonuses")
+
+    assert result["success"] is False
+    assert result["generated_sql"] == "SELECT bonus FROM employees"
+    assert result["error"] == "Unknown column: bonus"

@@ -13,11 +13,14 @@ Modular system for loading and querying structured data with SQLite.
 - **SQL Validator (`validation/`)**  
   Ensures queries are safe (SELECT-only, valid tables/columns, no dangerous SQL)
 
-- **Query Service (`query/`)**  
-  Validates and executes SQL queries, returning structured results
+  - **Query Service (`query/`)**  
+  Validates and executes SQL queries, and now also routes natural language queries through the LLM adapter
 
 - **CLI (`cli.py`)**  
-  Interactive interface for loading data, inspecting schema, and running queries
+  Interactive interface for loading data, inspecting schema, running SQL queries, and asking natural language questions
+
+- **LLM Adapter (`llm/`)**  
+  Converts natural language into SQL using LLM API endpoint, while keeping SQL validation and execution in the existing pipeline
 
 ## Testing
 
@@ -27,9 +30,8 @@ Modular system for loading and querying structured data with SQLite.
 ## Status
 
 Working system for:
-- CSV ingestion → SQLite  
-- Schema-aware table management  
-- Safe SQL validation and execution  
-- CLI-based interaction  
-
-Next: LLM adapter for natural language → SQL
+- CSV ingestion → SQLite
+- Schema-aware table management
+- Safe SQL validation and execution
+- CLI-based interaction
+- Natural language → SQL through LLM adapter

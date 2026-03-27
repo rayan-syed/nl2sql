@@ -1,4 +1,5 @@
 pandas
+google-genai
 pytest
 autopep8
 flake8
