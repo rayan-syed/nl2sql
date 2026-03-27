@@ -1,5 +1,4 @@
 import sqlite3
-
 import pytest
 
 from validation.sql_validator import SQLValidator

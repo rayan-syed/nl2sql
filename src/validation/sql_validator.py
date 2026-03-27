@@ -1,5 +1,4 @@
 import re
-
 from schema.schema_manager import SchemaManager
 
 

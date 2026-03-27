@@ -1,5 +1,4 @@
 import sqlite3
-
 import pytest
 
 from schema.schema_manager import SchemaManager

@@ -1,5 +1,4 @@
 import sqlite3
-
 import pytest
 
 from query.query_service import QueryService

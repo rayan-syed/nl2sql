@@ -1,7 +1,6 @@
 import os
 import re
 import sqlite3
-
 import pandas as pd
 
 from schema.schema_manager import SchemaManager
