@@ -13,6 +13,23 @@ Modular system for loading and querying structured data with SQLite.
 - **SQL Validator (`validation/`)**  
   Ensures queries are safe (SELECT-only, valid tables/columns, no dangerous SQL)
 
+- **Query Service (`query/`)**  
+  Validates and executes SQL queries, returning structured results
+
+- **CLI (`cli.py`)**  
+  Interactive interface for loading data, inspecting schema, and running queries
+
+## Testing
+
+- **Unit tests** for each module  
+- **Integration tests** for end-to-end CLI workflows (CSV → DB → query)
+
 ## Status
 
-Working ingestion + schema management + basic query validation. More components (query service, CLI, LLM) to be added.
+Working system for:
+- CSV ingestion → SQLite  
+- Schema-aware table management  
+- Safe SQL validation and execution  
+- CLI-based interaction  
+
+Next: LLM adapter for natural language → SQL
