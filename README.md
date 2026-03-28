@@ -13,8 +13,6 @@ A modular CLI tool for loading CSV data into SQLite and querying it using SQL or
 
 All queries (manual or LLM-generated) go through the same validation layer before execution.
 
-## System Diagram
-
 ## System Design
 
 <p align="center">
